@@ -43,13 +43,13 @@ class InsuranceBlockchain:
 # --- STREAMLIT UI ---
 st.set_page_config(page_title="Insurance Ledger", page_icon="🏦")
 
-# Initialize blockchain
+# Initialize blockchain in session state
 if 'blockchain' not in st.session_state:
     st.session_state.blockchain = InsuranceBlockchain()
 
 st.title("🛡️ Insurance Blockchain Ledger")
 
-# Navigation Sidebar
+# Simplified Navigation
 menu = st.sidebar.selectbox("Select Action", ["Issue New Policy", "View Public Ledger"])
 
 if menu == "Issue New Policy":
@@ -83,21 +83,19 @@ if menu == "Issue New Policy":
 
 elif menu == "View Public Ledger":
     st.header("📑 Transaction History")
-    st.write("Each card below represents a 'Block' in the chain.")
-
+    
+    # Show the blocks in reverse order (newest at the top)
     for block in reversed(st.session_state.blockchain.chain):
-        # Calculate current block hash for display
         current_hash = st.session_state.blockchain.hash(block)
         
         with st.expander(f"📦 Block #{block['index']} | Hash: {current_hash[:16]}..."):
-            st.write(f"**Timestamp:** {block['timestamp']}")
             st.write(f"**Previous Block Hash:** `{block['previous_hash']}`")
-            st.write("**Transactions In This Block:**")
             if block['transactions']:
                 st.table(block['transactions'])
             else:
-                st.write("No transactions (Genesis Block)")
+                st.write("*Genesis Block (No transactions)*")
 
-    if st.sidebar.button("Clear Chain Data"):
-        del st.session_state.blockchain
-        st.rerun()
+# Sidebar reset option
+if st.sidebar.button("Reset Chain Data"):
+    st.session_state.blockchain = InsuranceBlockchain()
+    st.rerun()
